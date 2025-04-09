@@ -156,6 +156,49 @@ public class main {
         System.out.println("SSN: " + rs.getString("ssn"));
         System.out.println("Email: " + rs.getString("email"));
     }
+    private static void updateEmployeeData(Connection conn, Scanner scanner, int empId) {
+        System.out.println("Which field do you want to update?");
+        System.out.println("1. Name");
+        System.out.println("2. DOB (YYYY-MM-DD)");
+        System.out.println("3. SSN");
+        System.out.println("4. Email");
+        System.out.print("Enter your choice: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine(); // consume newline
+
+        String field = "";
+        switch (choice) {
+            case 1: field = "name"; break;
+            case 2: field = "dob"; break;
+            case 3: field = "ssn"; break;
+            case 4: field = "email"; break;
+            default:
+                System.out.println("Invalid field choice.");
+                return;
+        }
+
+        System.out.print("Enter the new value: ");
+        String newValue = scanner.nextLine();
+
+        String updateQuery = "UPDATE employees SET " + field + " = ? WHERE empid = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(updateQuery)) {
+            pstmt.setString(1, newValue);
+            pstmt.setInt(2, empId);
+
+            int rowsUpdated = pstmt.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("Employee data updated successfully.");
+            } else {
+                System.out.println("Update failed. No rows affected.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+
     
     // The rest of the methods (`searchEmployeeData`, `updateEmployeeData`, `displayEmployeeInfo`) remain unchanged
 }
