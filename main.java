@@ -87,6 +87,75 @@ public class main {
         String choice = scanner.nextLine();
         return choice.equalsIgnoreCase("y");
     }
-
+    private static void searchEmployeeData(Connection conn, Scanner scanner, boolean allowUpdate) {
+        System.out.println("Search employee by:");
+        System.out.println("1. Name");
+        System.out.println("2. Date of Birth (YYYY-MM-DD)");
+        System.out.println("3. SSN");
+        System.out.println("4. Employee ID");
+        System.out.print("Enter choice: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine(); // consume newline
+    
+        String query = "";
+        String input;
+    
+        switch (choice) {
+            case 1:
+                System.out.print("Enter full name: ");
+                input = scanner.nextLine();
+                query = "SELECT * FROM employees WHERE name = ?";
+                break;
+            case 2:
+                System.out.print("Enter DOB (YYYY-MM-DD): ");
+                input = scanner.nextLine();
+                query = "SELECT * FROM employees WHERE dob = ?";
+                break;
+            case 3:
+                System.out.print("Enter SSN: ");
+                input = scanner.nextLine();
+                query = "SELECT * FROM employees WHERE ssn = ?";
+                break;
+            case 4:
+                System.out.print("Enter Employee ID: ");
+                input = scanner.nextLine();
+                query = "SELECT * FROM employees WHERE empid = ?";
+                break;
+            default:
+                System.out.println("Invalid choice.");
+                return;
+        }
+    
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, input);
+            ResultSet rs = pstmt.executeQuery();
+    
+            boolean found = false;
+            while (rs.next()) {
+                found = true;
+                displayEmployeeInfo(rs);
+    
+                if (allowUpdate && promptYesNo(scanner, "Do you want to update this employee?")) {
+                    updateEmployeeData(conn, scanner, rs.getInt("empid"));
+                }
+            }
+    
+            if (!found) {
+                System.out.println("No matching employee found.");
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    private static void displayEmployeeInfo(ResultSet rs) throws SQLException {
+        System.out.println("\n--- Employee Info ---");
+        System.out.println("Employee ID: " + rs.getInt("empid"));
+        System.out.println("Name: " + rs.getString("name"));
+        System.out.println("DOB: " + rs.getDate("dob"));
+        System.out.println("SSN: " + rs.getString("ssn"));
+        System.out.println("Email: " + rs.getString("email"));
+    }
+    
     // The rest of the methods (`searchEmployeeData`, `updateEmployeeData`, `displayEmployeeInfo`) remain unchanged
 }
