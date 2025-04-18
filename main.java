@@ -2,7 +2,6 @@ import java.sql.*;
 import java.util.Scanner;
 
 public class main {
-
     public static void main(String[] args) {
         try (Scanner scanner = new Scanner(System.in)) {
 
@@ -25,8 +24,6 @@ public class main {
                     }
                 } else {
                     System.out.println("Login failed. Please check your username and password.");
-                }
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -119,6 +116,7 @@ public class main {
         } catch (NumberFormatException e) {
             System.out.println("Invalid number format. Please enter valid numbers.");
         }
+
     }
 
     private static void handleEmployee(Connection conn, String username) throws SQLException {
