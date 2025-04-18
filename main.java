@@ -36,7 +36,7 @@ public class main {
         return DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/employeeData",
                 "root",
-                "Purestar64"
+                "Blep4590"
         );
     }
 
@@ -89,5 +89,6 @@ public class main {
     }
 
     // The rest of the methods (`searchEmployeeData`, `updateEmployeeData`, `displayEmployeeInfo`) remain unchanged
+    //example
 }
 
