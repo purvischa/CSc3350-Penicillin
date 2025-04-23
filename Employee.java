@@ -7,10 +7,15 @@ public class Employee {
     private double salary;
     private String jobTitle;
     private String division;
+    private String street;
+    private String cityId;
+    private String stateId;
+    private String zip;
 
     // Constructor
     public Employee(int id, String firstName, String lastName, String email, 
-                   String phoneNumber, double salary, String jobTitle, String division) {
+                   String phoneNumber, double salary, String jobTitle, String division,
+                   String street, String cityId, String stateId, String zip) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -19,6 +24,10 @@ public class Employee {
         this.salary = salary;
         this.jobTitle = jobTitle;
         this.division = division;
+        this.street = street;
+        this.cityId = cityId;
+        this.stateId = stateId;
+        this.zip = zip;
     }
 
     // Getters
@@ -51,7 +60,14 @@ public class Employee {
             Job Title: %s
             Division: %s
             Salary: $%.2f
+            
+            Address Information:
+            Street: %s
+            City ID: %s
+            State ID: %s
+            ZIP: %s
             """, 
-            id, firstName, lastName, email, phoneNumber, jobTitle, division, salary);
+            id, firstName, lastName, email, phoneNumber, jobTitle, division, salary,
+            street, cityId, stateId, zip);
     }
 }
