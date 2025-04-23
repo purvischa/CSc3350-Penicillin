@@ -1,18 +1,22 @@
+require('dotenv').config();
+
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const app = express();
+
+// Use port from .env or default to 3000
 const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-// Database connection (You can update this later for a remote MySQL server)
+// ─── Database Connection ───────────────────────────────────────────────────────
 const db = mysql.createConnection({
-  host: 'localhost',      // If you're using a local MySQL server
-  user: 'root',           // Your MySQL username
-  password: 'Ag2025tha?!',           // Your MySQL password
-  database: 'employeeData' // Your MySQL database name
+  host:     process.env.DB_HOST,
+  user:     process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME
 });
 
 db.connect(err => {
@@ -20,12 +24,14 @@ db.connect(err => {
   else console.log('Connected to MySQL database.');
 });
 
-// Simple route to test the server
+// ─── Routes ────────────────────────────────────────────────────────────────────
+
+// Health check
 app.get('/', (req, res) => {
   res.send('Hello from your backend server!');
 });
 
-// Get all employees
+// List all employees
 app.get('/employees', (req, res) => {
   db.query('SELECT * FROM employees', (err, results) => {
     if (err) throw err;
