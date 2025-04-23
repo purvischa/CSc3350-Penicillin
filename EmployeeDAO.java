@@ -568,27 +568,7 @@ public class EmployeeDAO {
         LEFT JOIN division d ON ed.div_ID = d.ID
     """;
 
-    /**
-     * Search for employees by name
-     */
-    public static List<Employee> searchByName(String name) {
-        String sql = BASE_EMPLOYEE_QUERY + "WHERE CONCAT(e.Fname, ' ', e.Lname) LIKE ?";
-        List<Employee> employees = new ArrayList<>();
 
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, "%" + name + "%");
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    employees.add(createEmployeeFromResultSet(rs));
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error searching employees by name: " + e.getMessage());
-        }
-        return employees;
-    }
 
     /**
      * Search for employees by date of birth
