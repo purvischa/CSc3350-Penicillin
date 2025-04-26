@@ -2,6 +2,9 @@ import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 
 /**
@@ -305,7 +308,20 @@ public class Menu {
                 case "1":
                     System.out.print("Enter employee name: ");
                     String name = scanner.nextLine().trim();
-                    employees = EmployeeDAO.searchByName(name);
+                    Connection conn = null;
+                    try {
+                        conn = Database.getConnection();
+                        ResultSet rs = EmployeeDAO.searchByName(conn, name);
+                        employees = new ArrayList<>();
+                        while (rs.next()) {
+                            employees.add(Employee.fromResultSet(rs));
+                        }
+                    } catch (SQLException e) {
+                        System.err.println("Error searching by name: " + e.getMessage());
+                        employees = new ArrayList<>();
+                    } finally {
+                        Database.closeConnection(conn);
+                    }
                     break;
                     
                 case "2":

@@ -1,12 +1,13 @@
 import java.sql.*;
 import java.util.Scanner;
+import java.util.List;
 
 public class main {
     public static void main(String[] args) {
         try (Scanner scanner = new Scanner(System.in)) {
             // Display login menu
             System.out.println("\n=== Login Menu ===\n");
-            System.out.println("For Administrators:");
+            System.out.println("For Admin:");
             System.out.println("  Username: -----");
             System.out.println("  Password: --------\n");
             System.out.println("For Employees:");
@@ -124,12 +125,21 @@ public class main {
                 case "2":
                     System.out.print("Enter DOB (YYYY-MM-DD): ");
                     String dob = scanner.nextLine();
-                    results = EmployeeDAO.searchByDOB(conn, dob);
+                    List<Employee> employees = EmployeeDAO.searchByDOB(dob);
+                    if (!employees.isEmpty()) {
+                        results = convertEmployeeToResultSet(employees.get(0));
+                    }
                     break;
                 case "3":
                     System.out.print("Enter SSN: ");
                     String ssn = scanner.nextLine();
-                    results = EmployeeDAO.searchBySSN(conn, ssn);
+                    List<Employee> employeesBySSN = EmployeeDAO.searchBySSN(ssn);
+                    if (!employeesBySSN.isEmpty()) {
+                        ResultSet employeeRs = convertEmployeeToResultSet(employeesBySSN.get(0));
+                        displayEmployeeInfo(employeeRs);
+                    } else {
+                        System.out.println("No employee found.");
+                    }
                     break;
                 case "4":
                     System.out.print("Enter Employee ID: ");
@@ -235,17 +245,34 @@ public class main {
         return choice.equalsIgnoreCase("y");
     }
 
-    private static void displayEmployeeInfo(ResultSet empData) throws SQLException {
+    private static ResultSet convertEmployeeToResultSet(Employee employee) {
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                 "SELECT e.*, j.title as job_title, d.name as division_name " +
+                 "FROM employees e " +
+                 "JOIN job_titles j ON e.job_title_id = j.id " +
+                 "JOIN divisions d ON e.division_id = d.id " +
+                 "WHERE e.empid = ?")) {
+            
+            stmt.setInt(1, employee.getId());
+            return stmt.executeQuery();
+        } catch (SQLException e) {
+            System.err.println("Error converting employee to ResultSet: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private static void displayEmployeeInfo(ResultSet rs) throws SQLException {
         System.out.println("\nEmployee Information:");
         System.out.println("------------------------");
-        System.out.println("Employee ID: " + empData.getInt("empid"));
-        System.out.println("Name: " + empData.getString("fname") + " " + empData.getString("lname"));
-        System.out.println("Email: " + empData.getString("email"));
-        System.out.println("Phone: " + empData.getString("phone"));
-        System.out.println("Address: " + empData.getString("address"));
-        System.out.println("DOB: " + empData.getString("DOB"));
-        System.out.println("SSN: " + empData.getString("SSN"));
-        System.out.println("Salary: $" + String.format("%.2f", empData.getDouble("salary")));
+        System.out.println("Employee ID: " + rs.getInt("empid"));
+        System.out.println("Name: " + rs.getString("fname") + " " + rs.getString("lname"));
+        System.out.println("Email: " + rs.getString("email"));
+        System.out.println("Phone: " + rs.getString("phone"));
+        System.out.println("Address: " + rs.getString("address"));
+        System.out.println("DOB: " + rs.getString("DOB"));
+        System.out.println("SSN: " + rs.getString("SSN"));
+        System.out.println("Salary: $" + String.format("%.2f", rs.getDouble("salary")));
         System.out.println("------------------------");
     }
 
@@ -288,7 +315,7 @@ public class main {
                 case "5":
                     System.out.print("Enter new salary: ");
                     double salary = Double.parseDouble(scanner.nextLine());
-                    EmployeeDAO.updateSalary(conn, empId, salary);
+                    EmployeeDAO.updateEmployeeField(empId, "Salary", String.valueOf(salary));
                     break;
                 case "6":
                     System.out.println("Update cancelled.");
