@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-
+import model.PayStatement;
 /**
  * Data Access Object for Employee operations
  * This class handles all database operations related to employees
@@ -140,7 +140,7 @@ public class EmployeeDAO {
     /**
      * Helper method to create an Employee object from a ResultSet
      */
-    private static Employee createEmployeeFromResultSet(ResultSet rs) throws SQLException {
+    public static Employee createEmployeeFromResultSet(ResultSet rs) throws SQLException {
         return new Employee(
             rs.getInt("empid"),
             rs.getString("Fname"),
@@ -157,11 +157,6 @@ public class EmployeeDAO {
         );
     }
 
-    /**
-     * Get pay statement history for employees
-     * @param empId if not 0, get only this employee's history; if 0, get all employees (admin only)
-     * @return List of PayStatement objects sorted by employee ID and pay date
-     */
     public static List<PayStatement> getPayStatementHistory(int empId) {
         List<PayStatement> history = new ArrayList<>();
         
@@ -177,7 +172,7 @@ public class EmployeeDAO {
             WHERE (? = 0 OR p.empID = ?)
             ORDER BY p.empID, p.pay_date DESC
             """;
-            
+        
         try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
@@ -192,18 +187,19 @@ public class EmployeeDAO {
                     rs.getDate("pay_date").toLocalDate(),
                     rs.getDouble("earnings"),
                     rs.getDouble("earnings") * 0.8, // Assuming 20% tax for net pay
-                    rs.getDouble("hours_worked"),
-                    rs.getString("job_title"),
-                    rs.getString("division_name")
+                    0,  // you need to fix hours_worked if needed
+                    "", // you need to fix job_title if needed
+                    ""  // you need to fix division_name if needed
                 ));
             }
-            
         } catch (SQLException e) {
-            System.err.println("Error getting pay history: " + e.getMessage());
+            System.err.println("Error fetching pay statements: " + e.getMessage());
         }
         
         return history;
     }
+
+   
 
     public static Map<String, Double> getTotalPayByDivision(int year, int month) {
         Map<String, Double> totals = new HashMap<>();

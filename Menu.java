@@ -437,18 +437,13 @@ public class Menu {
     }
 
     private static void showPayStatementHistory(String role, int userId) {
-        List<PayStatement> statements;
-        if (role.equals("admin")) {
-            statements = EmployeeDAO.getPayStatementHistory(0); // 0 means get all
-        } else {
-            statements = EmployeeDAO.getPayStatementHistory(userId);
-        }
-        
+        List<PayStatement> statements = EmployeeDAO.getPayStatementHistory(role.equals("admin") ? 0 : userId);
+
         if (statements.isEmpty()) {
             System.out.println("No pay statements found.");
             return;
         }
-        
+    
         for (PayStatement stmt : statements) {
             System.out.println("\n" + stmt);
         }
