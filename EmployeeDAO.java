@@ -100,25 +100,17 @@ public class EmployeeDAO {
     /**
      * Search for employees by name
      */
-    public static List<Employee> searchByName(String name) {
-        List<Employee> results = new ArrayList<>();
+    public static ResultSet searchByName(Connection conn, String name) {
         String sql = BASE_EMPLOYEE_QUERY + " WHERE CONCAT(e.Fname, ' ', e.Lname) LIKE ?";
         
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
+        try {
+            PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, "%" + name + "%");
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    results.add(createEmployeeFromResultSet(rs));
-                }
-            }
-            
+            return stmt.executeQuery();
         } catch (SQLException e) {
             System.err.println("Error searching by name: " + e.getMessage());
+            return null;
         }
-        
-        return results;
     }
 
     /**
