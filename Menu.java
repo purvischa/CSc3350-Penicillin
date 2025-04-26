@@ -286,7 +286,7 @@ public class Menu {
     /**
      * Handle employee search
      */
-    private static void searchEmployees() {
+    public static void searchEmployees() {
         while (true) {
             System.out.println("\nSearch by:");
             System.out.println("1. Name");
