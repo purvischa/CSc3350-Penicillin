@@ -437,20 +437,43 @@ public class Menu {
     }
 
     private static void showPayStatementHistory(String role, int userId) {
-        List<PayStatement> statements;
-        if (role.equals("admin")) {
-            statements = EmployeeDAO.getPayStatementHistory(0); // 0 means get all
-        } else {
-            statements = EmployeeDAO.getPayStatementHistory(userId);
-        }
-        
-        if (statements.isEmpty()) {
-            System.out.println("No pay statements found.");
-            return;
-        }
-        
-        for (PayStatement stmt : statements) {
-            System.out.println("\n" + stmt);
+        try {
+            ResultSet statements;
+            if (role.equals("admin")) {
+                statements = EmployeeDAO.getPayStatementHistory(0); // 0 means get all
+            } else {
+                statements = EmployeeDAO.getPayStatementHistory(userId);
+            }
+            
+            if (statements == null) {
+                System.out.println("Error retrieving pay statements.");
+                return;
+            }
+
+            System.out.println("\nPay Statement History");
+            System.out.println("------------------------");
+            System.out.printf("%-10s %-20s %-15s %-12s %-12s%n", 
+                            "Emp ID", "Name", "Pay Date", "Gross Pay", "Net Pay");
+            System.out.println("------------------------------------------------");
+
+            boolean hasData = false;
+            while (statements.next()) {
+                hasData = true;
+                System.out.printf("%-10d %-20s %-15s $%-11.2f $%-11.2f%n",
+                    statements.getInt("empid"),
+                    statements.getString("fname") + " " + statements.getString("lname"),
+                    statements.getString("pay_date"),
+                    statements.getDouble("gross_pay"),
+                    statements.getDouble("net_pay"));
+            }
+
+            if (!hasData) {
+                System.out.println("No pay statements found.");
+            }
+            System.out.println("------------------------");
+
+        } catch (SQLException e) {
+            System.err.println("Error displaying pay statements: " + e.getMessage());
         }
     }
 

@@ -1,6 +1,9 @@
 import java.sql.*;
 import java.util.Scanner;
 import java.util.List;
+import java.util.Map;
+
+
 
 public class main {
     public static void main(String[] args) {
@@ -133,10 +136,9 @@ public class main {
                 case "3":
                     System.out.print("Enter SSN: ");
                     String ssn = scanner.nextLine();
-                    List<Employee> employeesBySSN = EmployeeDAO.searchBySSN(ssn);
+                    List<Employee> employeesBySSN = EmployeeDAO.searchBySSN(conn, ssn);
                     if (!employeesBySSN.isEmpty()) {
-                        ResultSet employeeRs = convertEmployeeToResultSet(employeesBySSN.get(0));
-                        displayEmployeeInfo(employeeRs);
+                        displayEmployeeInfo(employeesBySSN.get(0));
                     } else {
                         System.out.println("No employee found.");
                     }
@@ -144,7 +146,12 @@ public class main {
                 case "4":
                     System.out.print("Enter Employee ID: ");
                     int empId = Integer.parseInt(scanner.nextLine());
-                    results = EmployeeDAO.searchById(conn, empId);
+                    Employee employee = EmployeeDAO.getEmployee(empId);
+                    if (employee != null) {
+                        displayEmployeeInfo(employee);
+                    } else {
+                        System.out.println("No employee found.");
+                    }
                     break;
                 case "5":
                     return;
@@ -154,7 +161,21 @@ public class main {
             }
 
             if (results != null && results.next()) {
-                displayEmployeeInfo(results);
+                Employee employee = new Employee(
+                    results.getInt("empid"),
+                    results.getString("fname"),
+                    results.getString("lname"),
+                    results.getString("email"),
+                    results.getString("phone"),
+                    results.getDouble("salary"),
+                    results.getString("job_title"),
+                    results.getString("division"),
+                    results.getString("street"),
+                    results.getString("city_id"),
+                    results.getString("state_id"),
+                    results.getString("zip")
+                );
+                displayEmployeeInfo(employee);
                 if (promptYesNo(scanner, "Would you like to edit this data?")) {
                     updateEmployeeData(conn, scanner, results.getInt("empid"));
                 }
@@ -178,12 +199,10 @@ public class main {
             System.out.print("Enter percentage increase (e.g., 3.2): ");
             double percentage = Double.parseDouble(scanner.nextLine());
 
-            int updatedCount = EmployeeDAO.updateSalariesInRange(conn, minSalary, maxSalary, percentage);
+            int updatedCount = EmployeeDAO.updateSalariesInRange(minSalary, maxSalary, percentage);
             System.out.println("Updated " + updatedCount + " employee salaries.");
         } catch (NumberFormatException e) {
             System.out.println("Invalid number format.");
-        } catch (SQLException e) {
-            System.out.println("Error updating salaries: " + e.getMessage());
         }
     }
 
@@ -201,16 +220,21 @@ public class main {
             try {
                 switch (choice) {
                     case "1":
-                        ResultSet payHistory = EmployeeDAO.getPayStatementHistory(conn);
+                        ResultSet payHistory = EmployeeDAO.getPayStatementHistory(0);
                         displayPayStatementHistory(payHistory);
                         break;
                     case "2":
-                        ResultSet jobTitlePay = EmployeeDAO.getTotalPayByJobTitle(conn);
-                        displayTotalPayByCategory(jobTitlePay, "Job Title");
-                        break;
                     case "3":
-                        ResultSet divisionPay = EmployeeDAO.getTotalPayByDivision(conn);
-                        displayTotalPayByCategory(divisionPay, "Division");
+                        // Get current year and month for the report
+                        java.time.LocalDate currentDate = java.time.LocalDate.now();
+                        Map<String, Double> payData;
+                        if (choice.equals("2")) {
+                            payData = EmployeeDAO.getTotalPayByJobTitle(currentDate.getYear(), currentDate.getMonthValue());
+                            displayTotalPayByCategory(payData, "Job Title");
+                        } else {
+                            payData = EmployeeDAO.getTotalPayByDivision(currentDate.getYear(), currentDate.getMonthValue());
+                            displayTotalPayByCategory(payData, "Division");
+                        }
                         break;
                     case "4":
                         return;
@@ -232,7 +256,7 @@ public class main {
             ResultSet empData = stmt.executeQuery();
 
             if (empData.next()) {
-                displayEmployeeInfo(empData);
+                displayEmployeeInfo(conn, empData);
             } else {
                 System.out.println("No employee record found.");
             }
@@ -262,18 +286,22 @@ public class main {
         }
     }
 
-    private static void displayEmployeeInfo(ResultSet rs) throws SQLException {
+    private static void displayEmployeeInfo(Employee employee) {
         System.out.println("\nEmployee Information:");
         System.out.println("------------------------");
-        System.out.println("Employee ID: " + rs.getInt("empid"));
-        System.out.println("Name: " + rs.getString("fname") + " " + rs.getString("lname"));
-        System.out.println("Email: " + rs.getString("email"));
-        System.out.println("Phone: " + rs.getString("phone"));
-        System.out.println("Address: " + rs.getString("address"));
-        System.out.println("DOB: " + rs.getString("DOB"));
-        System.out.println("SSN: " + rs.getString("SSN"));
-        System.out.println("Salary: $" + String.format("%.2f", rs.getDouble("salary")));
+        System.out.println("Employee ID: " + employee.getId());
+        System.out.println("Name: " + employee.getFirstName() + " " + employee.getLastName());
+        System.out.println("Email: " + employee.getEmail());
+        System.out.println("Phone: " + employee.getPhoneNumber());
+        System.out.println("Salary: $" + String.format("%.2f", employee.getSalary()));
+        System.out.println("Job Title: " + employee.getJobTitle());
+        System.out.println("Division: " + employee.getDivision());
         System.out.println("------------------------");
+    }
+
+    private static void displayEmployeeInfo(Connection conn, ResultSet rs) throws SQLException {
+        Employee employee = EmployeeDAO.createEmployeeFromResultSet(rs);
+        displayEmployeeInfo(employee);
     }
 
     private static void updateEmployeeData(Connection conn, Scanner scanner, int empId) throws SQLException {
@@ -300,7 +328,7 @@ public class main {
                 case "2":
                     System.out.print("Enter new email: ");
                     String email = scanner.nextLine();
-                    EmployeeDAO.updateEmail(conn, empId, email);
+                    EmployeeDAO.updateEmployee(empId, "email", email);
                     break;
                 case "3":
                     System.out.print("Enter new phone: ");
@@ -310,7 +338,7 @@ public class main {
                 case "4":
                     System.out.print("Enter new address: ");
                     String address = scanner.nextLine();
-                    EmployeeDAO.updateAddress(conn, empId, address);
+                    EmployeeDAO.updateEmployeeField(empId, "Address", address);
                     break;
                 case "5":
                     System.out.print("Enter new salary: ");
@@ -348,16 +376,16 @@ public class main {
         System.out.println("------------------------");
     }
 
-    private static void displayTotalPayByCategory(ResultSet totals, String category) throws SQLException {
+    private static void displayTotalPayByCategory(Map<String, Double> totals, String category) {
         System.out.println("\nTotal Pay by " + category);
         System.out.println("------------------------");
         System.out.printf("%-30s %-15s%n", category, "Total Pay");
         System.out.println("------------------------------------------------");
 
-        while (totals.next()) {
+        for (Map.Entry<String, Double> entry : totals.entrySet()) {
             System.out.printf("%-30s $%-14.2f%n",
-                totals.getString("name"),
-                totals.getDouble("total_pay"));
+                entry.getKey(),
+                entry.getValue());
         }
         System.out.println("------------------------");
     }
