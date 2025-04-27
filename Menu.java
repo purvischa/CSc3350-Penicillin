@@ -315,6 +315,19 @@ public class Menu {
                         employees = new ArrayList<>();
                         while (rs.next()) {
                             employees.add(Employee.fromResultSet(rs));
+                                System.out.print("Enter employee ID: ");
+                                try {
+                                    int empId = Integer.parseInt(scanner.nextLine().trim());
+                                    Employee emp = EmployeeDAO.getEmployee(empId);
+                                    if (emp != null) {
+                                        employees = new ArrayList<>();
+                                        employees.add(emp);
+                                    }
+                                } catch (NumberFormatException e) {
+                                    System.out.println("Invalid employee ID format.");
+                                    break; // <-- Change this line from 'continue;' to 'break;'
+                                }
+                                break;
                         }
                     } catch (SQLException e) {
                         System.err.println("Error searching by name: " + e.getMessage());
