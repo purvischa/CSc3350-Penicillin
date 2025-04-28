@@ -5,7 +5,7 @@ import java.util.Map;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import model.PayStatement;
 
 /**
  * Handles all menu operations and user interaction
@@ -450,55 +450,31 @@ public class Menu {
     }
 
     private static void showPayStatementHistory(String role, int userId) {
-<<<<<<< HEAD
-        try {
-            ResultSet statements;
-            if (role.equals("admin")) {
-                statements = EmployeeDAO.getPayStatementHistory(0); // 0 means get all
-            } else {
-                statements = EmployeeDAO.getPayStatementHistory(userId);
-            }
-            
-            if (statements == null) {
-                System.out.println("Error retrieving pay statements.");
+        List<PayStatement> payHistory;
+        if (role.equals("admin")) {
+            System.out.print("Enter employee ID (0 for all): ");
+            try {
+                int empId = Integer.parseInt(scanner.nextLine().trim());
+                payHistory = EmployeeDAO.getPayStatementHistory(empId);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid employee ID format.");
                 return;
             }
+        } else {
+            payHistory = EmployeeDAO.getPayStatementHistory(userId);
+        }
 
-            System.out.println("\nPay Statement History");
-            System.out.println("------------------------");
-            System.out.printf("%-10s %-20s %-15s %-12s %-12s%n", 
-                            "Emp ID", "Name", "Pay Date", "Gross Pay", "Net Pay");
-            System.out.println("------------------------------------------------");
-
-            boolean hasData = false;
-            while (statements.next()) {
-                hasData = true;
-                System.out.printf("%-10d %-20s %-15s $%-11.2f $%-11.2f%n",
-                    statements.getInt("empid"),
-                    statements.getString("fname") + " " + statements.getString("lname"),
-                    statements.getString("pay_date"),
-                    statements.getDouble("gross_pay"),
-                    statements.getDouble("net_pay"));
-            }
-
-            if (!hasData) {
-                System.out.println("No pay statements found.");
-            }
-            System.out.println("------------------------");
-
-        } catch (SQLException e) {
-            System.err.println("Error displaying pay statements: " + e.getMessage());
-=======
-        List<PayStatement> statements = EmployeeDAO.getPayStatementHistory(role.equals("admin") ? 0 : userId);
-
-        if (statements.isEmpty()) {
+        if (payHistory.isEmpty()) {
             System.out.println("No pay statements found.");
             return;
         }
-    
-        for (PayStatement stmt : statements) {
-            System.out.println("\n" + stmt);
->>>>>>> b34bf5a4d4641c330ac1a80d27103c8a345a184c
+
+        // Display pay statements
+        System.out.println("\nPay Statement History:");
+        System.out.println("---------------------");
+        for (PayStatement stmt : payHistory) {
+            System.out.println(stmt);
+            System.out.println("---------------------");
         }
     }
 
