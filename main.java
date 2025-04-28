@@ -2,6 +2,7 @@ import java.sql.*;
 import java.util.Scanner;
 import java.util.List;
 import java.util.Map;
+import model.PayStatement;
 
 
 
@@ -49,7 +50,7 @@ public class main {
         return DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/employeeData",
                 "root",
-                "Purestar64"
+                "Aga2025tha?!"
         );
     }
 
@@ -136,7 +137,7 @@ public class main {
                 case "3":
                     System.out.print("Enter SSN: ");
                     String ssn = scanner.nextLine();
-                    List<Employee> employeesBySSN = EmployeeDAO.searchBySSN(conn, ssn);
+                    List<Employee> employeesBySSN = EmployeeDAO.searchBySSN(ssn);
                     if (!employeesBySSN.isEmpty()) {
                         displayEmployeeInfo(employeesBySSN.get(0));
                     } else {
@@ -184,6 +185,8 @@ public class main {
             }
         } catch (SQLException e) {
             System.out.println("Error searching for employee: " + e.getMessage());
+        } finally {
+            // Clean up any resources if needed
         }
     }
 
@@ -217,32 +220,28 @@ public class main {
 
             String choice = scanner.nextLine();
 
-            try {
-                switch (choice) {
-                    case "1":
-                        ResultSet payHistory = EmployeeDAO.getPayStatementHistory(0);
-                        displayPayStatementHistory(payHistory);
-                        break;
-                    case "2":
-                    case "3":
-                        // Get current year and month for the report
-                        java.time.LocalDate currentDate = java.time.LocalDate.now();
-                        Map<String, Double> payData;
-                        if (choice.equals("2")) {
-                            payData = EmployeeDAO.getTotalPayByJobTitle(currentDate.getYear(), currentDate.getMonthValue());
-                            displayTotalPayByCategory(payData, "Job Title");
-                        } else {
-                            payData = EmployeeDAO.getTotalPayByDivision(currentDate.getYear(), currentDate.getMonthValue());
-                            displayTotalPayByCategory(payData, "Division");
-                        }
-                        break;
-                    case "4":
-                        return;
-                    default:
-                        System.out.println("Invalid choice.");
-                }
-            } catch (SQLException e) {
-                System.out.println("Error generating report: " + e.getMessage());
+            switch (choice) {
+                case "1":
+                    List<PayStatement> payHistory = EmployeeDAO.getPayStatementHistory(0);
+                    displayPayStatementHistory(payHistory);
+                    break;
+                case "2":
+                case "3":
+                    // Get current year and month for the report
+                    java.time.LocalDate currentDate = java.time.LocalDate.now();
+                    Map<String, Double> payData;
+                    if (choice.equals("2")) {
+                        payData = EmployeeDAO.getTotalPayByJobTitle(currentDate.getYear(), currentDate.getMonthValue());
+                        displayTotalPayByCategory(payData, "Job Title");
+                    } else {
+                        payData = EmployeeDAO.getTotalPayByDivision(currentDate.getYear(), currentDate.getMonthValue());
+                        displayTotalPayByCategory(payData, "Division");
+                    }
+                    break;
+                case "4":
+                    return;
+                default:
+                    System.out.println("Invalid choice.");
             }
         }
     }
@@ -256,7 +255,39 @@ public class main {
             ResultSet empData = stmt.executeQuery();
 
             if (empData.next()) {
-                displayEmployeeInfo(conn, empData);
+                int empId = empData.getInt("employee_id");
+                boolean running = true;
+                Scanner scanner = new Scanner(System.in);
+                
+                while (running) {
+                    System.out.println("\n=== Employee Menu ===");
+                    System.out.println("1. View my information");
+                    System.out.println("2. Update my information");
+                    System.out.println("3. View my pay statements");
+                    System.out.println("4. Logout");
+                    System.out.print("\nEnter your choice (1-4): ");
+                    
+                    String choice = scanner.nextLine();
+                    
+                    switch (choice) {
+                        case "1":
+                            displayEmployeeInfo(conn, empData);
+                            break;
+                        case "2":
+                            updateEmployeeData(conn, scanner, empId);
+                            break;
+                        case "3":
+                            List<PayStatement> payHistory = EmployeeDAO.getPayStatementHistory(empId);
+                            displayPayStatementHistory(payHistory);
+                            break;
+                        case "4":
+                            running = false;
+                            System.out.println("Logging out...");
+                            break;
+                        default:
+                            System.out.println("Invalid choice. Please try again.");
+                    }
+                }
             } else {
                 System.out.println("No employee record found.");
             }
@@ -304,7 +335,7 @@ public class main {
         displayEmployeeInfo(employee);
     }
 
-    private static void updateEmployeeData(Connection conn, Scanner scanner, int empId) throws SQLException {
+    private static void updateEmployeeData(Connection conn, Scanner scanner, int empId) {
         System.out.println("\n=== Update Employee Data ===");
         System.out.println("What would you like to update?");
         System.out.println("1. Name");
@@ -316,62 +347,71 @@ public class main {
         System.out.print("Enter your choice (1-6): ");
 
         String choice = scanner.nextLine();
-        try {
-            switch (choice) {
-                case "1":
-                    System.out.print("Enter new first name: ");
-                    String fname = scanner.nextLine();
-                    System.out.print("Enter new last name: ");
-                    String lname = scanner.nextLine();
-                    EmployeeDAO.updateName(conn, empId, fname, lname);
-                    break;
-                case "2":
-                    System.out.print("Enter new email: ");
-                    String email = scanner.nextLine();
-                    EmployeeDAO.updateEmployee(empId, "email", email);
-                    break;
-                case "3":
-                    System.out.print("Enter new phone: ");
-                    String phone = scanner.nextLine();
-                    EmployeeDAO.updatePhone(conn, empId, phone);
-                    break;
-                case "4":
-                    System.out.print("Enter new address: ");
-                    String address = scanner.nextLine();
-                    EmployeeDAO.updateEmployeeField(empId, "Address", address);
-                    break;
-                case "5":
+        boolean success = false;
+        
+        switch (choice) {
+            case "1":
+                System.out.print("Enter new first name: ");
+                String fname = scanner.nextLine();
+                System.out.print("Enter new last name: ");
+                String lname = scanner.nextLine();
+                success = EmployeeDAO.updateEmployeeField(empId, "FirstName", fname) &&
+                         EmployeeDAO.updateEmployeeField(empId, "LastName", lname);
+                break;
+            case "2":
+                System.out.print("Enter new email: ");
+                String email = scanner.nextLine();
+                success = EmployeeDAO.updateEmployeeField(empId, "Email", email);
+                break;
+            case "3":
+                System.out.print("Enter new phone: ");
+                String phone = scanner.nextLine();
+                success = EmployeeDAO.updateEmployeeField(empId, "Phone", phone);
+                break;
+            case "4":
+                System.out.print("Enter new address: ");
+                String address = scanner.nextLine();
+                success = EmployeeDAO.updateEmployeeField(empId, "Address", address);
+                break;
+            case "5":
+                try {
                     System.out.print("Enter new salary: ");
                     double salary = Double.parseDouble(scanner.nextLine());
-                    EmployeeDAO.updateEmployeeField(empId, "Salary", String.valueOf(salary));
-                    break;
-                case "6":
-                    System.out.println("Update cancelled.");
+                    success = EmployeeDAO.updateEmployeeField(empId, "Salary", String.valueOf(salary));
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid salary format. Please enter a number.");
                     return;
-                default:
-                    System.out.println("Invalid choice.");
-                    return;
-            }
+                }
+                break;
+            case "6":
+                System.out.println("Update cancelled.");
+                return;
+            default:
+                System.out.println("Invalid choice.");
+                return;
+        }
+        
+        if (success) {
             System.out.println("Update successful!");
-        } catch (SQLException e) {
-            System.out.println("Error updating employee data: " + e.getMessage());
+        } else {
+            System.out.println("Error updating employee data.");
         }
     }
 
-    private static void displayPayStatementHistory(ResultSet history) throws SQLException {
+    private static void displayPayStatementHistory(List<PayStatement> history) {
         System.out.println("\nPay Statement History");
         System.out.println("------------------------");
         System.out.printf("%-10s %-20s %-15s %-12s %-12s%n", 
                         "Emp ID", "Name", "Pay Date", "Gross Pay", "Net Pay");
         System.out.println("------------------------------------------------");
 
-        while (history.next()) {
+        for (PayStatement stmt : history) {
             System.out.printf("%-10d %-20s %-15s $%-11.2f $%-11.2f%n",
-                history.getInt("empid"),
-                history.getString("fname") + " " + history.getString("lname"),
-                history.getString("pay_date"),
-                history.getDouble("gross_pay"),
-                history.getDouble("net_pay"));
+                stmt.getEmployeeId(),
+                stmt.getEmployeeName(),
+                stmt.getPayDate(),
+                stmt.getGrossPay(),
+                stmt.getNetPay());
         }
         System.out.println("------------------------");
     }
