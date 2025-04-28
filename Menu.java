@@ -450,15 +450,31 @@ public class Menu {
     }
 
     private static void showPayStatementHistory(String role, int userId) {
-        List<PayStatement> statements = EmployeeDAO.getPayStatementHistory(role.equals("admin") ? 0 : userId);
+        List<PayStatement> payHistory;
+        if (role.equals("admin")) {
+            System.out.print("Enter employee ID (0 for all): ");
+            try {
+                int empId = Integer.parseInt(scanner.nextLine().trim());
+                payHistory = EmployeeDAO.getPayStatementHistory(empId);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid employee ID format.");
+                return;
+            }
+        } else {
+            payHistory = EmployeeDAO.getPayStatementHistory(userId);
+        }
 
-        if (statements.isEmpty()) {
+        if (payHistory.isEmpty()) {
             System.out.println("No pay statements found.");
             return;
         }
-    
-        for (PayStatement stmt : statements) {
-            System.out.println("\n" + stmt);
+
+        // Display pay statements
+        System.out.println("\nPay Statement History:");
+        System.out.println("---------------------");
+        for (PayStatement stmt : payHistory) {
+            System.out.println(stmt);
+            System.out.println("---------------------");
         }
     }
 
