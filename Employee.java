@@ -30,6 +30,29 @@ public class Employee {
         this.zip = zip;
     }
 
+    /**
+     * Create an Employee object from a ResultSet row.
+     * @param rs The ResultSet positioned at the desired row
+     * @return Employee object with fields populated from the ResultSet
+     * @throws SQLException if a database access error occurs
+     */
+    public static Employee fromResultSet(java.sql.ResultSet rs) throws java.sql.SQLException {
+        return new Employee(
+            rs.getInt("empid"),
+            rs.getString("Fname"),
+            rs.getString("Lname"),
+            rs.getString("email"),
+            rs.getString("phone_number"),
+            rs.getDouble("Salary"),
+            rs.getString("job_title"),
+            rs.getString("Division"),
+            rs.getString("street"),
+            rs.getString("city_id"),
+            rs.getString("state_id"),
+            rs.getString("zip")
+        );
+    }
+
     // Getters
     public int getId() { return id; }
     public String getFirstName() { return firstName; }

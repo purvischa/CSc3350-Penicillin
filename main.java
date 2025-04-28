@@ -49,7 +49,7 @@ public class main {
         return DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/employeeData",
                 "root",
-                "Aga2025tha?!"
+                "Purestar64"
         );
     }
 
