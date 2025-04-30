@@ -1,7 +1,7 @@
 import java.util.Scanner;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,9 +11,14 @@ import model.PayStatement;
  * Handles all menu operations and user interaction
  */
 public class Menu {
-    private static String role;
-    private static int userId;
+    private static String role = null;
+    private static int userId = -1;
     private static final Scanner scanner = new Scanner(System.in);
+
+    public static void initialize(String userRole, int id) {
+        role = userRole;
+        userId = id;
+    }
 
     /**
      * Show login menu and handle authentication
@@ -60,7 +65,11 @@ public class Menu {
     /**
      * Show main menu and handle main operations
      */
-    private static void showMainMenu() {
+    public static void showMainMenu() {
+        if (role == null) {
+            System.out.println("Error: Menu not initialized. Please login first.");
+            return;
+        }
         while (true) {
             if (role.equals("admin")) {
                 System.out.println("\nAdmin Menu:");
@@ -287,11 +296,11 @@ public class Menu {
     }
 
     /**
-     * Handle employee search
+     * Search for employees using various criteria
      */
-    public static void searchEmployees() {
+    private static void searchEmployees() {
         while (true) {
-            System.out.println("\nSearch by:");
+            System.out.println("\nSearch Employees by:");
             System.out.println("1. Name");
             System.out.println("2. Employee ID");
             System.out.println("3. Date of Birth");
@@ -315,19 +324,6 @@ public class Menu {
                         employees = new ArrayList<>();
                         while (rs.next()) {
                             employees.add(Employee.fromResultSet(rs));
-                                System.out.print("Enter employee ID: ");
-                                try {
-                                    int empId = Integer.parseInt(scanner.nextLine().trim());
-                                    Employee emp = EmployeeDAO.getEmployee(empId);
-                                    if (emp != null) {
-                                        employees = new ArrayList<>();
-                                        employees.add(emp);
-                                    }
-                                } catch (NumberFormatException e) {
-                                    System.out.println("Invalid employee ID format.");
-                                    break; // <-- Change this line from 'continue;' to 'break;'
-                                }
-                                break;
                         }
                     } catch (SQLException e) {
                         System.err.println("Error searching by name: " + e.getMessage());
@@ -386,7 +382,7 @@ public class Menu {
                         int empId = Integer.parseInt(scanner.nextLine().trim());
                         boolean found = false;
                         for (Employee emp : employees) {
-                            if (emp.getId() == empId) {
+                            if (emp.getEmpId() == empId) {
                                 updateEmployeeInfo(empId);
                                 found = true;
                                 break;
@@ -399,7 +395,7 @@ public class Menu {
                         System.out.println("Invalid employee ID format.");
                     }
                 } else {
-                    updateEmployeeInfo(employees.get(0).getId());
+                    updateEmployeeInfo(employees.get(0).getEmpId());
                 }
             }
         }
@@ -699,7 +695,11 @@ public class Menu {
     /**
      * Handle salary updates for a range of employees
      */
-    private static void updateSalariesMenu() {
+    public static void updateSalariesMenu() {
+        if (!role.equals("admin")) {
+            System.out.println("Error: Admin access required.");
+            return;
+        }
         System.out.println("\nUpdate Salaries:");
         
         double minSalary = 0;

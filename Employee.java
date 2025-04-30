@@ -1,33 +1,40 @@
 public class Employee {
-    private int id;
-    private String firstName;
-    private String lastName;
+    private int empid;
+    private String Fname;
+    private String Lname;
     private String email;
-    private String phoneNumber;
-    private double salary;
-    private String jobTitle;
-    private String division;
+    private String phone_number;
+    private double Salary;
+    private String job_title;
+    private String Name; // division name
     private String street;
-    private String cityId;
-    private String stateId;
+    private String city_id;
+    private String state_id;
     private String zip;
+    private String SSN;
+    private String DOB;
+    private String HireDate;
 
     // Constructor
-    public Employee(int id, String firstName, String lastName, String email, 
-                   String phoneNumber, double salary, String jobTitle, String division,
-                   String street, String cityId, String stateId, String zip) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
+    public Employee(int empid, String Fname, String Lname, String email, 
+                   String phone_number, double Salary, String job_title, String Name,
+                   String street, String city_id, String state_id, String zip,
+                   String SSN, String DOB, String HireDate) {
+        this.empid = empid;
+        this.Fname = Fname;
+        this.Lname = Lname;
         this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.salary = salary;
-        this.jobTitle = jobTitle;
-        this.division = division;
+        this.phone_number = phone_number;
+        this.Salary = Salary;
+        this.job_title = job_title;
+        this.Name = Name;
         this.street = street;
-        this.cityId = cityId;
-        this.stateId = stateId;
+        this.city_id = city_id;
+        this.state_id = state_id;
         this.zip = zip;
+        this.SSN = SSN;
+        this.DOB = DOB;
+        this.HireDate = HireDate;
     }
 
     /**
@@ -45,32 +52,41 @@ public class Employee {
             rs.getString("phone_number"),
             rs.getDouble("Salary"),
             rs.getString("job_title"),
-            rs.getString("Division"),
+            rs.getString("Name"), // division name
             rs.getString("street"),
             rs.getString("city_id"),
             rs.getString("state_id"),
-            rs.getString("zip")
+            rs.getString("zip"),
+            rs.getString("SSN"),
+            rs.getString("DOB"),
+            rs.getString("HireDate")
         );
     }
 
     // Getters
-    public int getId() { return id; }
-    public String getFirstName() { return firstName; }
-    public String getLastName() { return lastName; }
+    public int getEmpId() { return empid; }
+    public String getFname() { return Fname; }
+    public String getLname() { return Lname; }
     public String getEmail() { return email; }
-    public String getPhoneNumber() { return phoneNumber; }
-    public double getSalary() { return salary; }
-    public String getJobTitle() { return jobTitle; }
-    public String getDivision() { return division; }
+    public String getPhoneNumber() { return phone_number; }
+    public double getSalary() { return Salary; }
+    public String getJobTitle() { return job_title; }
+    public String getDivisionName() { return Name; }
+    public String getSSN() { return SSN; }
+    public String getDOB() { return DOB; }
+    public String getHireDate() { return HireDate; }
 
     // Setters
-    public void setFirstName(String firstName) { this.firstName = firstName; }
-    public void setLastName(String lastName) { this.lastName = lastName; }
+    public void setFname(String Fname) { this.Fname = Fname; }
+    public void setLname(String Lname) { this.Lname = Lname; }
     public void setEmail(String email) { this.email = email; }
-    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
-    public void setSalary(double salary) { this.salary = salary; }
-    public void setJobTitle(String jobTitle) { this.jobTitle = jobTitle; }
-    public void setDivision(String division) { this.division = division; }
+    public void setPhoneNumber(String phone_number) { this.phone_number = phone_number; }
+    public void setSalary(double Salary) { this.Salary = Salary; }
+    public void setJobTitle(String job_title) { this.job_title = job_title; }
+    public void setDivisionName(String Name) { this.Name = Name; }
+    public void setSSN(String SSN) { this.SSN = SSN; }
+    public void setDOB(String DOB) { this.DOB = DOB; }
+    public void setHireDate(String HireDate) { this.HireDate = HireDate; }
 
     @Override
     public String toString() {
@@ -90,7 +106,7 @@ public class Employee {
             State ID: %s
             ZIP: %s
             """, 
-            id, firstName, lastName, email, phoneNumber, jobTitle, division, salary,
-            street, cityId, stateId, zip);
+            empid, Fname, Lname, email, phone_number, job_title, Name, Salary,
+            street, city_id, state_id, zip);
     }
 }
