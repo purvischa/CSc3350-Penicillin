@@ -51,9 +51,6 @@ Thumbs.db
 .env
 .env.*.local
 
-# JDBC driver JAR (if checked in)
-/lib/*.jar
-
 # -----------------------
 # Miscellaneous
 # -----------------------
