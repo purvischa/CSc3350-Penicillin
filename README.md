@@ -13,7 +13,6 @@
 ```bash
 git clone https://github.com/purvischa/CSc3350-Penicillin.git
 cd SoftwareDev_FinalProject
-git checkout complete
 ```
 
 Copy or create `.env` in the project root:
