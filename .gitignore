@@ -1,4 +1,63 @@
-node_modules/
-package-lock.json
+# -----------------------
+# Java & Build Artifacts
+# -----------------------
+
+# Maven / Gradle build directories
+/target/
+/build/
+/out/
+/bin/
+
+# Compiled class files
+**/*.class
+
+# Fat JARs, WARs, and EARs
+*.jar
+*.war
+*.ear
+
+# Log files
+*.log
+
+# -----------------------
+# Project Files
+# -----------------------
+
+# IntelliJ IDEA
+/.idea/
+/*.iml
+*.iws
+
+# Eclipse
+/.classpath
+/.project
+/.settings/
+/.recommenders
+
+# VS Code
+.vscode/
+
+# MacOS
 .DS_Store
+
+# Windows
+Thumbs.db
+
+# -----------------------
+# Environment & Secrets
+# -----------------------
+
+# dotenv environment files
 .env
+.env.*.local
+
+# JDBC driver JAR (if checked in)
+/lib/*.jar
+
+# -----------------------
+# Miscellaneous
+# -----------------------
+
+# Temporary files
+*~ 
+*.swp
