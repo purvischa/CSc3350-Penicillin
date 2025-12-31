@@ -1,3 +1,16 @@
+# JavaFX + MySQL employee management system with role-based actions
+## (admin vs employee)
+
+## Features
+- Login/Authorization
+- Search Employees
+- Update Employee Records
+- Payroll Reporting
+- Salary Updates
+
+## Architecture
+- JavaFX UI → service layer → DB access layer (DAO) → MySQL
+
 # Quick Start
 
 ## Prerequisites
